@@ -99,6 +99,7 @@ Project root name is found using `auto-virtualenv--project-root'"
   (when (auto-virtualenv-find-virtualenv-name)
     (expand-file-name (auto-virtualenv-find-virtualenv-name) auto-virtualenv-dir)))
 
+;;;###autoload
 (defun auto-virtualenv-set-virtualenv ()
   "Activate virtualenv for buffer-filename"
   (let ((virtualenv-path (auto-virtualenv-find-virtualenv-path)))
