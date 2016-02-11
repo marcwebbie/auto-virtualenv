@@ -6,7 +6,7 @@
 ;; URL: http://github.com/marcwebbie/auto-virtualenv.el
 ;; Version: 1.0
 ;; Keywords: Python, Virtualenv, Tools
-;; Package-Requires: ((cli-lib "0.5") (pyvenv-mode "1.9"))
+;; Package-Requires: ((cl-lib "0.5") (pyvenv "1.9") (s "1.10.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 (require 'cl-lib)
 (require 'python)
 (require 'pyvenv)
-
+(require 's)
 
 (defun auto-virtualenv-first-file-exists-p (filelist)
   (let ((filename (expand-file-name (car filelist))))
