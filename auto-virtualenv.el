@@ -39,8 +39,9 @@
 (require 's)
 
 (defun auto-virtualenv-first-file-exists-p (filelist)
-  (let ((filename (expand-file-name (car filelist))))
-   (if (file-exists-p filename) filename (first-file-exists-p (cdr filelist)))))
+  (cl-loop for filename in (mapcar #'expand-file-name filelist)
+           when (file-exists-p filename)
+           return filename))
 
 (defcustom auto-virtualenv-dir (auto-virtualenv-first-file-exists-p '("~/.virtualenvs" "~/.pyenv/versions"))
   "The intended virtualenvs installation directory."
