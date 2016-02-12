@@ -34,6 +34,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'vc)
 (require 'python)
 (require 'pyvenv)
 (require 's)
@@ -49,8 +50,8 @@
   :safe #'stringp
   :group 'auto-virtualenv)
 
-(defvar auto-virtualenv-project-roots
-  '(".git" ".hg" "Rakefile" "Makefile" "README" "build.xml" ".emacs-project" "Gemfile" ".projectile" "manage.py")
+(defvar auto-virtualenv-project-root-files
+  '(".python-version" ".dir-locals.el" ".projectile" ".emacs-project" "manage.py" ".git" ".hg")
   "The presence of any file/directory in this list indicates a project root.")
 
 (defvar auto-virtualenv--project-root nil
@@ -61,17 +62,38 @@
   "Used internally to cache virtualenv versions.")
 (make-variable-buffer-local 'auto-virtualenv--versions)
 
+(defun auto-virtualenv--project-root-projectile ()
+  "Return projectile root if projectile is available"
+  (when (boundp 'projectile-project-root)
+    (projectile-project-root)))
+
+(defun auto-virtualenv--project-root-vc ()
+  "Return vc root if file is in version control"
+  (when (or
+         (vc-find-root (buffer-file-name) ".git")
+         (vc-find-root (buffer-file-name) ".hg"))))
+
+(defun auto-virtualenv--project-root-traverse ()
+  "Tranvese parent directories looking for files
+in `auto-virtualenv-project-root-files' that indicates
+a root directory"
+  (expand-file-name
+   (locate-dominating-file default-directory
+                           (lambda (dir)
+                             (cl-intersection
+                              auto-virtualenv-project-root-files
+                              (directory-files dir)
+                              :test 'string-equal)))))
+
 (defun auto-virtualenv--project-root ()
   "Return the current project root directory."
   (or auto-virtualenv--project-root
       (setq auto-virtualenv--project-root
-            (expand-file-name
-             (or (locate-dominating-file default-directory
-                                     (lambda (dir)
-                                       (cl-intersection
-                                        auto-virtualenv-project-roots
-                                        (directory-files dir)
-                                        :test 'string-equal))) "")))))
+            (or (auto-virtualenv--project-root-projectile)
+                (auto-virtualenv--project-root-vc)
+                (auto-virtualenv--project-root-traverse)
+             ""))))
+
 (defun auto-virtualenv--project-name ()
   "Return the project project root name"
   (file-name-nondirectory
