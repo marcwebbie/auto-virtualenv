@@ -119,7 +119,7 @@ Project root name is found using `auto-virtualenv--project-root'"
 
 (defun auto-virtualenv-find-virtualenv-path ()
   "Find path to virtualenv name"
-  (when (auto-virtualenv-find-virtualenv-name)
+  (when (and (buffer-file-name) (auto-virtualenv-find-virtualenv-name))
     (expand-file-name (auto-virtualenv-find-virtualenv-name) auto-virtualenv-dir)))
 
 ;;;###autoload
