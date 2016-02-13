@@ -4,7 +4,7 @@
 
 ;; Author: Marcwebbie <marcwebbie@gmail.com>
 ;; URL: http://github.com/marcwebbie/auto-virtualenv.el
-;; Version: 1.0
+;; Version: 1.1.0
 ;; Keywords: Python, Virtualenv, Tools
 ;; Package-Requires: ((cl-lib "0.5") (pyvenv "1.9") (s "1.10.0"))
 
