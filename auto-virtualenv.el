@@ -4,7 +4,7 @@
 
 ;; Author: Marcwebbie <marcwebbie@gmail.com>
 ;; URL: http://github.com/marcwebbie/auto-virtualenv
-;; Version: 1.1.0
+;; Version: 1.2.0
 ;; Keywords: Python, Virtualenv, Tools
 ;; Package-Requires: ((cl-lib "0.5") (pyvenv "1.9") (s "1.10.0"))
 
@@ -53,6 +53,13 @@
 (defvar auto-virtualenv-project-root-files
   '(".python-version" ".dir-locals.el" ".projectile" ".emacs-project" "manage.py" ".git" ".hg")
   "The presence of any file/directory in this list indicates a project root.")
+
+(defvar auto-virtualenv-verbose nil
+  "Verbose output on activation")
+
+(defvar auto-virtualenv--path nil
+  "Used internally to cache the current virtualenv path.")
+(make-variable-buffer-local 'auto-virtualenv--path)
 
 (defvar auto-virtualenv--project-root nil
   "Used internally to cache the project root.")
@@ -106,30 +113,40 @@ a root directory"
       (setq auto-virtualenv--versions
             (directory-files (expand-file-name auto-virtualenv-dir)))))
 
-(defun auto-virtualenv-find-virtualenv-name ()
-  "Get current buffer-file possible virtualenv name.
-It will try name from .python-version file if it exists or
-It will find a virtualenv with the same name of Project Root.
-Project root name is found using `auto-virtualenv--project-root'"
-  (let ((python-version-file (expand-file-name ".python-version" (auto-virtualenv--project-root))))
-    (cond ((file-exists-p python-version-file)
-           (with-temp-buffer (insert-file-contents python-version-file) (s-trim (buffer-string))))
-          ((member (auto-virtualenv--project-name) (auto-virtualenv--versions))
-           (auto-virtualenv--project-name)))))
+(defun auto-virtualenv-expandpath (path)
+  (expand-file-name path auto-virtualenv-dir))
 
 (defun auto-virtualenv-find-virtualenv-path ()
-  "Find path to virtualenv name"
-  (when (and (buffer-file-name) (auto-virtualenv-find-virtualenv-name))
-    (expand-file-name (auto-virtualenv-find-virtualenv-name) auto-virtualenv-dir)))
+  "Get current buffer-file possible virtualenv name.
+1. Try name from .python-version file if it exists or
+2. Try .venv dir in the root of project
+3. Try find a virtualenv with the same name of Project Root.
+Project root name is found using `auto-virtualenv--project-root'"
+  (let ((python-version-file (expand-file-name ".python-version" (auto-virtualenv--project-root)))
+        (dot-venv-dir (expand-file-name ".venv/" (auto-virtualenv--project-root))))
+    (cond
+     ;; 1. Try name from .python-version file if it exists or
+     ((file-exists-p python-version-file)
+      (auto-virtualenv-expandpath
+       (with-temp-buffer
+         (insert-file-contents python-version-file) (s-trim (buffer-string)))))
+     ;; 2. Try .venv dir in the root of project
+     ((file-exists-p dot-venv-dir)
+      dot-venv-dir)
+     ;; 3. Try find a virtualenv with the same name of Project Root.
+     ((member (auto-virtualenv--project-name) (auto-virtualenv--versions))
+      (auto-virtualenv-expandpath (auto-virtualenv--project-name))))))
 
 ;;;###autoload
 (defun auto-virtualenv-set-virtualenv ()
   "Activate virtualenv for buffer-filename"
   (let ((virtualenv-path (auto-virtualenv-find-virtualenv-path)))
-    (when (and virtualenv-path (not (equal pyvenv-virtual-env-name (auto-virtualenv--project-name))))
-      (message "activated virtualenv: %s" virtualenv-path)
+    (when (and virtualenv-path (not (equal virtualenv-path auto-virtualenv--path)))
+      (setq auto-virtualenv--path virtualenv-path)
       (pyvenv-mode t)
-      (pyvenv-activate virtualenv-path))))
+      (pyvenv-activate virtualenv-path)
+      (when auto-virtualenv-verbose
+        (message "activated virtualenv: %s" virtualenv-path)))))
 
 (provide 'auto-virtualenv)
 
