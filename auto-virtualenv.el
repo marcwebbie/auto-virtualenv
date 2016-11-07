@@ -65,9 +65,6 @@
   "Used internally to cache the project root.")
 (make-variable-buffer-local 'auto-virtualenv--project-root)
 
-(defvar auto-virtualenv--versions nil
-  "Used internally to cache virtualenv versions.")
-(make-variable-buffer-local 'auto-virtualenv--versions)
 
 (defun auto-virtualenv--project-root-projectile ()
   "Return projectile root if projectile is available"
@@ -109,9 +106,8 @@ a root directory"
 
 (defun auto-virtualenv--versions ()
   "Get list of available virtualenv names"
-  (or auto-virtualenv--versions
-      (setq auto-virtualenv--versions
-            (directory-files (expand-file-name auto-virtualenv-dir)))))
+  (if (and auto-virtualenv-dir (file-exists-p (expand-file-name auto-virtualenv-dir)))
+      (directory-files (expand-file-name auto-virtualenv-dir))))
 
 (defun auto-virtualenv-expandpath (path)
   (expand-file-name path auto-virtualenv-dir))
@@ -134,7 +130,7 @@ Project root name is found using `auto-virtualenv--project-root'"
      ((file-exists-p dot-venv-dir)
       dot-venv-dir)
      ;; 3. Try find a virtualenv with the same name of Project Root.
-     ((member (auto-virtualenv--project-name) (auto-virtualenv--versions))
+     ((and (auto-virtualenv--versions) (member (auto-virtualenv--project-name) (auto-virtualenv--versions)))
       (auto-virtualenv-expandpath (auto-virtualenv--project-name))))))
 
 ;;;###autoload
