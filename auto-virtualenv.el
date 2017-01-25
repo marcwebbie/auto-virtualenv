@@ -1,6 +1,6 @@
 ;;; auto-virtualenv.el --- Auto activate python virtualenvs
 
-;; Copyright (C) 2016 Marcwebbie
+;; Copyright (C) 2017 Marcwebbie
 
 ;; Author: Marcwebbie <marcwebbie@gmail.com>
 ;; URL: http://github.com/marcwebbie/auto-virtualenv
@@ -68,26 +68,28 @@
 
 (defun auto-virtualenv--project-root-projectile ()
   "Return projectile root if projectile is available"
-  (when (boundp 'projectile-project-root)
+  (when (and (boundp 'projectile-project-root) (not (equal (projectile-project-name) "-")))
     (projectile-project-root)))
 
 (defun auto-virtualenv--project-root-vc ()
   "Return vc root if file is in version control"
   (when (or
-         (vc-find-root (buffer-file-name) ".git")
-         (vc-find-root (buffer-file-name) ".hg"))))
+         (vc-find-root (or (buffer-file-name) "") ".git")
+         (vc-find-root (or (buffer-file-name) "") ".hg"))))
+
 
 (defun auto-virtualenv--project-root-traverse ()
   "Tranvese parent directories looking for files
 in `auto-virtualenv-project-root-files' that indicates
 a root directory"
-  (expand-file-name
-   (locate-dominating-file default-directory
+  (let ((dominating-file (locate-dominating-file default-directory
                            (lambda (dir)
                              (cl-intersection
                               auto-virtualenv-project-root-files
                               (directory-files dir)
                               :test 'string-equal)))))
+    (when dominating-file
+      (expand-file-name dominating-file))))
 
 (defun auto-virtualenv--project-root ()
   "Return the current project root directory."
@@ -102,7 +104,7 @@ a root directory"
   "Return the project project root name"
   (file-name-nondirectory
    (directory-file-name
-    (file-name-directory (auto-virtualenv--project-root)))))
+    (or (file-name-directory (auto-virtualenv--project-root)) ""))))
 
 (defun auto-virtualenv--versions ()
   "Get list of available virtualenv names"
