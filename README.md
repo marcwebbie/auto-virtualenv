@@ -20,14 +20,14 @@ Clone this repository somewhere and add this directory to you
 
 ## Configuration
 
-``` elisp
+```elisp
 (require 'auto-virtualenv)
 (add-hook 'python-mode-hook 'auto-virtualenv-set-virtualenv)
 ```
 
 Optionally:
 
-```
+```elisp
 ;; Activate on changing buffers
 (add-hook 'window-configuration-change-hook 'auto-virtualenv-set-virtualenv)
 ;; Activate on focus in
