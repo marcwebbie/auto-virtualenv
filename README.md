@@ -35,6 +35,24 @@ Optionally:
 
 ```
 
+## How it works
+
+On `auto-virtualenv-set-virtualenv`, the hierarchy is scanned for a
+special file, which is part of the list
+`auto-virtualenv-project-root-files`. The list contains files which
+indicate a project root, like a `.git` directory or a `.dir-locals.el`
+file.
+
+If a .python-version file exists, the contents of the file joined to
+the project root, form the location of the virtualenv. Otherwise if a
+.venv directory is found in the project root, this directory is
+used. Otherwise a directory within `~/.virtualenvs` or
+`~/.pyenv/versions/`, having with the project's name, which is the
+directory name of the project root, is checked for being a virtual
+env.
+
+The found environment is finally activated using `pyvenv-activate`.
+
 ## Alternatives
 
 + [pyenv-mode-auto](https://github.com/ssbb/pyenv-mode-auto)
