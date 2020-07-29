@@ -50,6 +50,11 @@
   :safe #'stringp
   :group 'auto-virtualenv)
 
+(defcustom auto-virtualenv-venv-dir ".venv"
+  "Possible directory names for virtualenv dir inside of project."
+  :type 'string
+  :group 'auto-virtualenv)
+
 (defvar auto-virtualenv-project-root-files
   '(".python-version" ".dir-locals.el" ".projectile" ".emacs-project" "manage.py" ".git" ".hg")
   "The presence of any file/directory in this list indicates a project root.")
@@ -120,8 +125,9 @@ a root directory"
 2. Try .venv dir in the root of project
 3. Try find a virtualenv with the same name of Project Root.
 Project root name is found using `auto-virtualenv--project-root'"
-  (let ((python-version-file (expand-file-name ".python-version" (auto-virtualenv--project-root)))
-        (dot-venv-dir (expand-file-name ".venv/" (auto-virtualenv--project-root))))
+  (let* ((project-root (auto-virtualenv--project-root))
+         (python-version-file (expand-file-name ".python-version" project-root))
+         (dot-venv-dir (expand-file-name auto-virtualenv-venv-dir project-root)))
     (cond
      ;; 1. Try name from .python-version file if it exists or
      ((file-exists-p python-version-file)
