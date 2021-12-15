@@ -43,7 +43,15 @@ special file, which is part of the list
 indicate a project root, like a `.git` directory or a `.dir-locals.el`
 file.
 
-If a .python-version file exists, the contents of the file joined to
+In order, files and paths to check for virtualenv to activate:
+
+- 0. `.auto-virtualenv-version` eg: `~/.virtualenvs/hello_world`
+- 1. `.python-version` eg: `3.8.0`
+- 2. Try `.venv` dir in the root of project
+- 3. Try finding a virtualenv with the same name of Project Root in `~/.virtualenvs/`.
+
+If a `auto-virtualenv-version` file is found then activate it from its path in the contents.
+If a `.python-version` file exists, the contents of the file joined to
 the project root, form the location of the virtualenv. Otherwise if a
 .venv directory is found in the project root, this directory is
 used. Otherwise a directory within `~/.virtualenvs` or
