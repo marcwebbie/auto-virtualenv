@@ -4,7 +4,7 @@
 
 ;; Author: Marcwebbie <marcwebbie@gmail.com>
 ;; URL: http://github.com/marcwebbie/auto-virtualenv
-;; Version: 1.4.0
+;; Version: 1.4.1
 ;; Keywords: Python, Virtualenv, Tools
 ;; Package-Requires: ((cl-lib "0.5") (pyvenv "1.9") (s "1.10.0"))
 
@@ -51,7 +51,7 @@
   :safe #'stringp
   :group 'auto-virtualenv)
 
-(defvar auto-virtualenv-custom-virtualenv-path nil
+(defvar auto-virtualenv-custom-virtualenv-path ".custom-virtualenv"
   "Variable that sets a custom virtualenv path")
 
 (defvar auto-virtualenv-project-root-files
