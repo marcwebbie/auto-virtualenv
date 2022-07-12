@@ -38,10 +38,14 @@ With `use-package`
 
 ```elisp
 (use-package auto-virtualenv
+  :ensure t
+  :init
+  (use-package pyvenv
+    :ensure t)
   :config
+  (require 'auto-virtualenv)
   (add-hook 'python-mode-hook 'auto-virtualenv-set-virtualenv)
-  (add-hook 'window-configuration-change-hook 'auto-virtualenv-set-virtualenv)
-  (add-hook 'focus-in-hook 'auto-virtualenv-set-virtualenv)
+  (add-hook 'projectile-after-switch-project-hook 'auto-virtualenv-set-virtualenv)  ;; If using projectile
   )
 ```
 
