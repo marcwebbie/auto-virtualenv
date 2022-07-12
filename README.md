@@ -13,7 +13,7 @@ You can install `auto-virtualenv` with the following command.
 
 <kbd>M-x package-install [RET] auto-virtualenv [RET]</kbd>
 
-### manual
+### Manual
 
 Clone this repository somewhere and add this directory to you
 `load-path`.
@@ -32,7 +32,18 @@ Optionally:
 (add-hook 'window-configuration-change-hook 'auto-virtualenv-set-virtualenv)
 ;; Activate on focus in
 (add-hook 'focus-in-hook 'auto-virtualenv-set-virtualenv)
+```
 
+With `use-package`
+
+```elisp
+(use-package auto-virtualenv
+  :config
+  (setq auto-virtualenv-dir "~/.virtualenvs")
+  (add-hook 'python-mode-hook 'auto-virtualenv-set-virtualenv)
+  (add-hook 'window-configuration-change-hook 'auto-virtualenv-set-virtualenv)
+  (add-hook 'focus-in-hook 'auto-virtualenv-set-virtualenv)
+  )
 ```
 
 ## How it works
@@ -45,25 +56,13 @@ file.
 
 In order, files and paths to check for virtualenv to activate:
 
-- 0. `.auto-virtualenv-version` eg: `~/.virtualenvs/hello_world`
-- 1. `.python-version` eg: `3.8.0`
-- 2. Try `.venv` dir in the root of project
-- 3. Try finding a virtualenv with the same name of Project Root in `~/.virtualenvs/`.
-
-If a `auto-virtualenv-version` file is found then activate it from its path in the contents.
-If a `.python-version` file exists, the contents of the file joined to
-the project root, form the location of the virtualenv. Otherwise if a
-.venv directory is found in the project root, this directory is
-used. Otherwise a directory within `~/.virtualenvs` or
-`~/.pyenv/versions/`, having with the project's name, which is the
-directory name of the project root, is checked for being a virtual
-env.
+- 0. Try path set from `auto-virtualenv-custom-virtualenv-path` variable
+- 1. Try path from `.auto-virtualenv-version` file if it exists or
+- 2. Try name from `.python-version` file if it exists or
+- 3. Try `.venv` or `.virtualenv` or `venv` dir in the root of project
+- 4. Try finding a virtualenv with the same name as Project in virtualenv dirs set in `auto-virtualenv-dir`.
 
 The found environment is finally activated using `pyvenv-activate`.
-
-## Alternatives
-
-+ [pyenv-mode-auto](https://github.com/ssbb/pyenv-mode-auto)
 
 ## License
 
