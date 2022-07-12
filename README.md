@@ -39,7 +39,6 @@ With `use-package`
 ```elisp
 (use-package auto-virtualenv
   :config
-  (setq auto-virtualenv-dir "~/.virtualenvs")
   (add-hook 'python-mode-hook 'auto-virtualenv-set-virtualenv)
   (add-hook 'window-configuration-change-hook 'auto-virtualenv-set-virtualenv)
   (add-hook 'focus-in-hook 'auto-virtualenv-set-virtualenv)
