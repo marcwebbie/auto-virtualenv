@@ -63,6 +63,7 @@ In order, files and paths to check for virtualenv to activate:
 - 2. Try name from `.python-version` file if it exists or
 - 3. Try `.venv` or `.virtualenv` or `venv` dir in the root of project
 - 4. Try finding a virtualenv with the same name as Project in virtualenv dirs set in `auto-virtualenv-dir`.
+- 4. Try common virtualenv paths in home dir: `~/.virtulenvs` and `~/.pyenv/versions`
 
 The found environment is finally activated using `pyvenv-activate`.
 

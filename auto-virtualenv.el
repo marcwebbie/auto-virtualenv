@@ -52,14 +52,14 @@
   :group 'auto-virtualenv)
 
 (defvar auto-virtualenv-custom-virtualenv-path ".custom-virtualenv"
-  "Variable that sets a custom virtualenv path")
+  "Variable that sets a custom virtualenv path.")
 
 (defvar auto-virtualenv-project-root-files
   '(".python-version" ".dir-locals.el" ".projectile" ".emacs-project" "manage.py" ".git" ".hg")
   "The presence of any file/directory in this list indicates a project root.")
 
 (defvar auto-virtualenv-verbose nil
-  "Verbose output on activation")
+  "Verbose output on activation.")
 
 (defvar auto-virtualenv--path nil
   "Used internally to cache the current virtualenv path.")
@@ -71,27 +71,27 @@
 
 
 (defun auto-virtualenv--project-root-projectile ()
-  "Return projectile root if projectile is available"
+  "Return projectile root if projectile is available."
   (when (and (boundp 'projectile-project-root) (not (equal (projectile-project-name) "-")))
     (projectile-project-root)))
 
 (defun auto-virtualenv--project-root-vc ()
-  "Return vc root if file is in version control"
+  "Return vc root if file is in version control."
   (or
    (vc-find-root (or (buffer-file-name) "") ".git")
    (vc-find-root (or (buffer-file-name) "") ".hg")))
 
 
 (defun auto-virtualenv--project-root-traverse ()
-  "Tranvese parent directories looking for files
+  "Transverse parent directories looking for files
 in `auto-virtualenv-project-root-files' that indicates
-a root directory"
+a root directory."
   (let ((dominating-file (locate-dominating-file default-directory
-                           (lambda (dir)
-                             (cl-intersection
-                              auto-virtualenv-project-root-files
-                              (directory-files dir)
-                              :test 'string-equal)))))
+                                                 (lambda (dir)
+                                                   (cl-intersection
+                                                    auto-virtualenv-project-root-files
+                                                    (directory-files dir)
+                                                    :test 'string-equal)))))
     (when dominating-file
       (expand-file-name dominating-file))))
 
@@ -102,16 +102,16 @@ a root directory"
             (or (auto-virtualenv--project-root-projectile)
                 (auto-virtualenv--project-root-vc)
                 (auto-virtualenv--project-root-traverse)
-             ""))))
+                ""))))
 
 (defun auto-virtualenv--project-name ()
-  "Return the project project root name"
+  "Return the project project root name."
   (file-name-nondirectory
    (directory-file-name
     (or (file-name-directory (auto-virtualenv--project-root)) ""))))
 
 (defun auto-virtualenv--versions ()
-  "Get list of available virtualenv names"
+  "Get list of available virtualenv names."
   (if (and auto-virtualenv-dir (file-exists-p (expand-file-name auto-virtualenv-dir)))
       (directory-files (expand-file-name auto-virtualenv-dir))))
 
@@ -125,6 +125,7 @@ a root directory"
 2. Try name from .python-version file if it exists or
 3. Try .venv or .virtualenv or venv dir in the root of project
 4. Try find a virtualenv with the same name of Project Root.
+5. Try common virtualenv paths in home dir
 Project root name is found using `auto-virtualenv--project-root'"
   (let ((python-version-file (expand-file-name ".python-version" (auto-virtualenv--project-root)))
         (custom-virtualenv-dir (expand-file-name auto-virtualenv-custom-virtualenv-path (auto-virtualenv--project-root)))
@@ -132,6 +133,8 @@ Project root name is found using `auto-virtualenv--project-root'"
         (dot-virtualenv-dir (expand-file-name ".virtualenv/" (auto-virtualenv--project-root)))
         (local-venv-dir (expand-file-name "venv/" (auto-virtualenv--project-root)))
         (auto-virtualenv-version-file (expand-file-name ".auto-virtualenv-version" (auto-virtualenv--project-root)))
+        (home-dot-virtualenvs-dir (expand-file-name ".virtualenvs/" "~"))
+        (home-dot-pyenv-versions-dir (expand-file-name ".pyenv/versions/" "~"))
         )
     (cond
      ;; 0. Try path set from custom virtualenv variable
@@ -160,11 +163,18 @@ Project root name is found using `auto-virtualenv--project-root'"
 
      ;; 4. Try find a virtualenv with the same name of Project Root.
      ((and (auto-virtualenv--versions) (member (auto-virtualenv--project-name) (auto-virtualenv--versions)))
-      (auto-virtualenv-expandpath (auto-virtualenv--project-name))))))
+      (auto-virtualenv-expandpath (auto-virtualenv--project-name)))
+
+     ;; 5. Try common virtualenv paths in home dir
+     ((file-exists-p (format "%s%s" (expand-file-name home-dot-virtualenvs-dir "~") (auto-virtualenv--project-name)))
+      (format "%s%s" (expand-file-name home-dot-virtualenvs-dir "~") (auto-virtualenv--project-name)))
+     ((file-exists-p (format "%s%s" (expand-file-name home-dot-pyenv-versions-dir "~") (auto-virtualenv--project-name)))
+      (format "%s%s" (expand-file-name home-dot-pyenv-versions-dir "~") (auto-virtualenv--project-name)))
+     )))
 
 ;;;###autoload
 (defun auto-virtualenv-set-virtualenv ()
-  "Activate virtualenv for buffer-filename"
+  "Activate virtualenv for buffer-filename."
   (let ((virtualenv-path (auto-virtualenv-find-virtualenv-path)))
     (when (and virtualenv-path (not (equal virtualenv-path auto-virtualenv--path)))
       (setq auto-virtualenv--path virtualenv-path)
