@@ -1,44 +1,70 @@
-;;; auto-virtualenv.el --- Automatically activate Python virtualenvs -*- lexical-binding: t; -*-
+;;; auto-virtualenv.el --- Automatically activate Python virtualenvs based on project directory -*- lexical-binding: t; -*-
 
 ;; Author: Marcwebbie <marcwebbie@gmail.com>
-;; URL: http://github.com/marcwebbie/auto-virtualenv
-;; Version: 2.0.0
-;; Keywords: python, virtualenv, tools
-;; Package-Requires: ((cl-lib "0.5") (projectile "2.3.0"))
+;; Maintainer: Marcwebbie <marcwebbie@gmail.com>
+;; URL: https://github.com/marcwebbie/auto-virtualenv
+;; Version: 2.1.0
+;; Keywords: python, virtualenv, environment, tools, projects
+;; Package-Requires: ((cl-lib "0.5"))
+;; License: GPL-3.0-or-later
 
 ;;; Commentary:
-;; Auto Virtualenv is an Emacs package designed to automatically activate Python virtual
-;; environments based on the project directory you're working in. By detecting both local
-;; (e.g., `.venv`) and global (e.g., `~/.pyenv/versions/`) environments, it streamlines the
-;; process of switching between projects with distinct environments.
+;;
+;; Auto Virtualenv is an Emacs package that automatically activates Python virtual
+;; environments based on the project directory you're working in. It simplifies
+;; switching between Python projects by detecting both local (e.g., `.venv`) and
+;; global (e.g., `~/.pyenv/versions/`) environments. It supports common Python
+;; project files (like `setup.py`, `pyproject.toml`) and can optionally integrate
+;; with `projectile` if installed, without making it a strict dependency.
 ;;
 ;; Features:
-;; - Automatically finds and activates the appropriate virtual environment upon entering a project.
-;; - Clearly indicates active environments in the mode line, displaying "Venv: N/A" when no
-;;   environment is active.
-;; - Supports customization of activation hooks, Python project file detection, and debug logging.
-;; - Non-intrusive mode line updates that prevent frequent resets, enhancing Emacs performance.
+;; - Auto-detects and activates virtual environments based on project root directory.
+;; - Displays active environment in the mode line; shows "Venv: N/A" when none is active.
+;; - Fallback to global virtual environments if no local `.venv` is found.
+;; - Allows users to set custom directories and file markers for project detection.
+;; - Optionally integrates with `projectile` if available for project root detection.
+;;
+;; Installation:
+;; - **MELPA**: Once available, use `M-x package-install` and search for `auto-virtualenv`.
+;; - **Straight.el**:
+;;   ```emacs-lisp
+;;   (use-package auto-virtualenv
+;;     :straight (:host github :repo "marcwebbie/auto-virtualenv")
+;;     :config
+;;     (setq auto-virtualenv-verbose t)
+;;     (auto-virtualenv-setup))
+;;   ```
+;; - **use-package** (for users not using `straight.el`):
+;;   ```emacs-lisp
+;;   (use-package auto-virtualenv
+;;     :load-path "path/to/auto-virtualenv.el"
+;;     :config
+;;     (setq auto-virtualenv-verbose t)
+;;     (auto-virtualenv-setup))
+;;   ```
 ;;
 ;; Usage:
-;; To install, place `auto-virtualenv.el` in your load path, then load it in your `init.el`:
+;; Simply open a Python file within a project directory. `auto-virtualenv` will
+;; automatically search for a local virtual environment (e.g., `.venv` in the project
+;; root), falling back to a global directory (such as `~/.pyenv/versions/`) if no local
+;; environment is found. Upon detection, it activates the virtual environment and updates
+;; the mode line to display the environment name.
 ;;
-;; (require 'auto-virtualenv)
-;; (setq auto-virtualenv-verbose t)
-;; (auto-virtualenv-setup)
-;;
-;; Alternatively, use `use-package` or `straight.el` for easy configuration (see README.md).
-;;
-;; Customizable Options:
+;; Customization:
 ;; - `auto-virtualenv-global-dirs`: Directories to search for virtual environments by project name.
 ;; - `auto-virtualenv-python-project-files`: List of files that identify a Python project.
-;; - `auto-virtualenv-activation-hooks`: Hooks to trigger virtual environment activation.
+;; - `auto-virtualenv-activation-hooks`: Hooks that trigger virtual environment activation.
 ;; - `auto-virtualenv-verbose`: Enable verbose output for debugging.
-
+;;
+;; Known Alternatives & Inspiration:
+;; - `pyvenv`: A popular package for managing virtual environments manually.
+;; - `pyenv-mode`: Integrates with `pyenv` to manage Python versions.
+;; - `pipenv.el`: Specific to `pipenv` workflows.
+;; - `projectile`: Project management with extensive file and project navigation features.
+;;
 ;;; Code:
 
-;; (code continues as defined previously)
 (require 'cl-lib)
-(require 'projectile)
 
 (defgroup auto-virtualenv nil
   "Automatically activate Python virtual environments."
@@ -53,14 +79,12 @@
 (defcustom auto-virtualenv-python-project-files
   '("requirements.txt" "Pipfile" "pyproject.toml" "setup.py" "manage.py" "tox.ini" ".flake8" "pytest.ini"
     ".pre-commit-config.yaml" "environment.yml" "__init__.py")
-  "List of files that identify a Python project.
-If any of these files are present in the project root, `auto-virtualenv` will
-attempt to activate a virtual environment."
+  "List of files that identify a Python project."
   :type '(repeat string)
   :group 'auto-virtualenv)
 
 (defcustom auto-virtualenv-activation-hooks
-  '(projectile-after-switch-project-hook find-file-hook)
+  '(find-file-hook)
   "Hooks that trigger virtual environment activation."
   :type '(repeat symbol)
   :group 'auto-virtualenv)
@@ -91,7 +115,6 @@ attempt to activate a virtual environment."
             (propertize (format "[Venv: %s]" (file-name-nondirectory (directory-file-name auto-virtualenv-current-virtualenv)))
                         'face '(:weight bold :foreground "DeepSkyBlue"))
           (propertize "[Venv: N/A]" 'face '(:weight bold :foreground "DimGray"))))
-  ;; Update global mode line format
   (setq global-mode-string (list auto-virtualenv-mode-line))
   (force-mode-line-update))
 
@@ -152,9 +175,23 @@ attempt to activate a virtual environment."
       (auto-virtualenv--debug "Virtualenv deactivated, mode line set to N/A"))
     (auto-virtualenv-update-mode-line)))
 
+(defun auto-virtualenv-locate-project-root ()
+  "Find the project root using `projectile-project-root` if available, else search for `.git` markers."
+  (if (and (featurep 'projectile) (fboundp 'projectile-project-root))
+      (projectile-project-root)
+    (let ((dir (locate-dominating-file default-directory
+                                        (lambda (parent)
+                                          (cl-some (lambda (marker)
+                                                     (file-exists-p (expand-file-name marker parent)))
+                                                   '(".git" "setup.py" "Pipfile" "pyproject.toml"))))))
+      (if dir
+          (expand-file-name dir)
+        (auto-virtualenv--debug "No project root found.")
+        nil))))
+
 (defun auto-virtualenv-find-and-activate ()
   "Find and activate a virtual environment based on the current project."
-  (let* ((project-root (projectile-project-root)))
+  (let* ((project-root (auto-virtualenv-locate-project-root)))
     (if (or (not project-root)
             (equal project-root auto-virtualenv-last-project))
         (auto-virtualenv--debug "Skipping activation as project root has not changed or is empty.")
