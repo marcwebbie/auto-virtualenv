@@ -1,45 +1,38 @@
-#+TITLE: Auto Virtualenv
+#+TITLE: auto-virtualenv.el - Seamless Python Virtualenv Activation in Emacs
 #+AUTHOR: Marcwebbie
-#+URL: http://github.com/marcwebbie/auto-virtualenv
+#+URL: https://github.com/marcwebbie/auto-virtualenv
 #+DESCRIPTION: Automatically activate Python virtual environments in Emacs
 
-* Auto Virtualenv
-  Auto Virtualenv is an Emacs package designed to automatically activate Python virtual environments based on the project directory you are working in. By detecting both local (e.g., .venv) and global (e.g., ~/.pyenv/versions/) environments, it streamlines the process of switching between projects with distinct environments.
+* Introduction
+auto-virtualenv.el is an Emacs package that automatically activates Python virtual environments based on the project you're working in. It detects both local (e.g., `.venv`) and global (e.g., `~/.pyenv/versions/`) environments, simplifying the process of switching between projects with distinct environments. It provides minimal mode line updates to maintain Emacs performance.
 
-  This package is intended for seamless Python development within Emacs by activating the relevant virtual environment when you navigate between different projects. It also minimizes frequent mode line updates, improving Emacs' performance.
-
-** Features
-- Automatically activates the appropriate virtual environment upon entering a project.
-- Displays the active environment in the mode line, or "Venv: N/A" when no environment is active.
-- Supports both local (.venv) and global virtual environments in customizable directories.
-- Non-intrusive mode line updates, avoiding frequent resets.
+* Features
+- **Automatic Environment Activation**: Activates the appropriate virtual environment upon entering a project.
+- **Clear Mode Line Indicators**: Displays the active environment in the mode line or shows "Venv: N/A" when none is active.
+- **Customizable Directories**: Searches both local and global directories for virtual environments.
+- **Minimal Mode Line Updates**: Avoids frequent resets for smoother Emacs performance.
 
 * Installation
 
-** MELPA
-If you use [[https://melpa.org][MELPA]], you can install ~auto-virtualenv~ by adding it to your ~init.el~:
-
+** From MELPA
+To install from MELPA, use the following command:
 #+BEGIN_SRC emacs-lisp
 (package-install 'auto-virtualenv)
 #+END_SRC
 
 ** Manual Installation
-Clone the repository and add ~auto-virtualenv.el~ to your load path.
-
+Clone the repository and add ~auto-virtualenv.el~ to your load path:
 #+BEGIN_SRC shell
 git clone https://github.com/marcwebbie/auto-virtualenv.git
 #+END_SRC
-
-Add the following to your Emacs configuration:
-
+Then add it to your Emacs configuration:
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'load-path "/path/to/auto-virtualenv")
 (require 'auto-virtualenv)
 #+END_SRC
 
 ** Using ~use-package~
-With ~use-package~, you can set it up as follows:
-
+Set up ~auto-virtualenv.el~ with ~use-package~:
 #+BEGIN_SRC emacs-lisp
 (use-package auto-virtualenv
   :load-path "path/to/auto-virtualenv"
@@ -49,8 +42,7 @@ With ~use-package~, you can set it up as follows:
 #+END_SRC
 
 ** Using ~straight.el~
-With ~straight.el~, set it up as:
-
+If you use ~straight.el~, configure it as follows:
 #+BEGIN_SRC emacs-lisp
 (straight-use-package
   '(auto-virtualenv :type git :host github :repo "marcwebbie/auto-virtualenv"))
@@ -60,14 +52,14 @@ With ~straight.el~, set it up as:
 (auto-virtualenv-setup)
 #+END_SRC
 
-* Configuration
+* Customization Options
+The package provides customizable options to adapt to your project structure:
 - ~auto-virtualenv-global-dirs~: Directories to search for virtual environments by project name.
 - ~auto-virtualenv-python-project-files~: Files that identify a Python project (e.g., ~requirements.txt~, ~setup.py~).
-- ~auto-virtualenv-activation-hooks~: List of hooks that trigger virtual environment activation. Default is ~find-file-hook~ and ~projectile-after-switch-project-hook~.
+- ~auto-virtualenv-activation-hooks~: Hooks that trigger virtual environment activation (default: ~find-file-hook~ and ~projectile-after-switch-project-hook~).
 - ~auto-virtualenv-verbose~: Enable verbose output for debugging.
 
 Example configuration:
-
 #+BEGIN_SRC emacs-lisp
 (setq auto-virtualenv-global-dirs
       '("~/.virtualenvs/" "~/.pyenv/versions/" "~/.envs/" "~/.conda/" "~/.conda/envs/"))
@@ -75,10 +67,14 @@ Example configuration:
       '("requirements.txt" "Pipfile" "pyproject.toml" "setup.py" "manage.py" "tox.ini" ".flake8"))
 #+END_SRC
 
-* Similar Projects and Inspiration
-- [[https://github.com/jorgenschaefer/pyvenv][pyvenv]]: Provides manual activation and deactivation of virtual environments.
-- [[https://github.com/purcell/exec-path-from-shell][exec-path-from-shell]]: Synchronizes Emacs environment variables with the shell.
-- [[https://github.com/bbatsov/projectile][projectile]]: Project management and navigation tool for Emacs.
+* Related Projects and Inspirations
+auto-virtualenv.el was inspired by several other projects, including:
+- [[https://github.com/jorgenschaefer/pyvenv][pyvenv]]: Manually activates and deactivates virtual environments.
+- [[https://github.com/purcell/exec-path-from-shell][exec-path-from-shell]]: Syncs Emacs environment variables with the shell.
+- [[https://github.com/bbatsov/projectile][projectile]]: A project management and navigation tool for Emacs.
 
 * License
 This project is licensed under the GPLv3.
+
+* Contributions
+Contributions are welcome! Feel free to open issues, submit pull requests, or suggest improvements.
