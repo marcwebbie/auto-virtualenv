@@ -1,114 +1,84 @@
-Here’s a more comprehensive README.md including additional sections on similar projects and inspirations:
+#+TITLE: Auto Virtualenv
+#+AUTHOR: Marcwebbie
+#+URL: http://github.com/marcwebbie/auto-virtualenv
+#+DESCRIPTION: Automatically activate Python virtual environments in Emacs
 
-auto-virtualenv
+* Auto Virtualenv
+  Auto Virtualenv is an Emacs package designed to automatically activate Python virtual environments based on the project directory you are working in. By detecting both local (e.g., .venv) and global (e.g., ~/.pyenv/versions/) environments, it streamlines the process of switching between projects with distinct environments.
 
-Auto Virtualenv is an Emacs package that automatically activates Python virtual environments based on the project you’re working on. By integrating seamlessly with projectile, it enables quick, efficient environment activation across multiple Python projects, reducing manual setup and enhancing productivity.
+  This package is intended for seamless Python development within Emacs by activating the relevant virtual environment when you navigate between different projects. It also minimizes frequent mode line updates, improving Emacs' performance.
 
-This package is especially useful for developers who frequently switch between Python projects, as it identifies project-specific virtual environments, both local and global, and activates them without requiring manual input.
+** Features
+- Automatically activates the appropriate virtual environment upon entering a project.
+- Displays the active environment in the mode line, or "Venv: N/A" when no environment is active.
+- Supports both local (.venv) and global virtual environments in customizable directories.
+- Non-intrusive mode line updates, avoiding frequent resets.
 
-Key Features
+* Installation
 
-    •	Automatic Environment Detection: Automatically identifies and activates Python virtual environments.
-    •	Local and Global Virtualenv Support: Recognizes both local .venv directories within projects and global environments stored in directories like ~/.pyenv/versions/.
-    •	Project-Specific Modeline: Displays the active virtual environment in the modeline, or shows “Venv: N/A” if none is found.
-    •	Configurable Project Indicators: Allows customization of project indicator files to restrict virtualenv activation to Python projects only.
-    •	Smooth Emacs Experience: Minimizes modeline updates and redundant checks for a more responsive editing experience.
+** MELPA
+If you use [[https://melpa.org][MELPA]], you can install ~auto-virtualenv~ by adding it to your ~init.el~:
 
-Installation
+#+BEGIN_SRC emacs-lisp
+(package-install 'auto-virtualenv)
+#+END_SRC
 
-You can install auto-virtualenv from MELPA once available, or download auto-virtualenv.el directly and add it to your Emacs load path.
+** Manual Installation
+Clone the repository and add ~auto-virtualenv.el~ to your load path.
 
-MELPA (recommended)
+#+BEGIN_SRC shell
+git clone https://github.com/marcwebbie/auto-virtualenv.git
+#+END_SRC
 
-To install auto-virtualenv from MELPA:
+Add the following to your Emacs configuration:
 
-M-x package-install RET auto-virtualenv RET
-
-Manual Installation
-
-    1.	Download auto-virtualenv.el and place it in a directory of your choice.
-    2.	Add the directory to your load-path in your init.el and require auto-virtualenv:
-
-(add-to-list 'load-path "/path/to/auto-virtualenv/")
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "/path/to/auto-virtualenv")
 (require 'auto-virtualenv)
+#+END_SRC
 
+** Using ~use-package~
+With ~use-package~, you can set it up as follows:
 
-
-Using use-package
-
+#+BEGIN_SRC emacs-lisp
 (use-package auto-virtualenv
-  :ensure t
-  :custom
-  (auto-virtualenv-verbose t)
+  :load-path "path/to/auto-virtualenv"
   :config
+  (setq auto-virtualenv-verbose t)
   (auto-virtualenv-setup))
+#+END_SRC
 
-Using straight.el
+** Using ~straight.el~
+With ~straight.el~, set it up as:
 
+#+BEGIN_SRC emacs-lisp
 (straight-use-package
- '(auto-virtualenv :type git :host github :repo "marcwebbie/auto-virtualenv"))
+  '(auto-virtualenv :type git :host github :repo "marcwebbie/auto-virtualenv"))
 
-(use-package auto-virtualenv
-  :custom
-  (auto-virtualenv-verbose t)
-  :config
-  (auto-virtualenv-setup))
-
-Configuration
-
-Key Customizations
-
-auto-virtualenv can be customized to suit various workflows. Here are some of the main options:
-
-    •	Global Virtualenv Directories: Define paths to search for global environments, ensuring easy integration with virtualenv managers like pyenv.
-
-(setq auto-virtualenv-global-dirs '("~/.virtualenvs/" "~/.pyenv/versions/"))
-
-
-    •	Python Project Indicators: Add or remove files that identify a Python project. Only projects containing these files will trigger virtual environment activation.
-
-(setq auto-virtualenv-python-project-files
-      '("requirements.txt" "Pipfile" "pyproject.toml" "setup.py"))
-
-
-    •	Activation Hooks: Control when environments should activate automatically. Adjust hooks based on personal workflow.
-
-(setq auto-virtualenv-activation-hooks
-      '(projectile-after-switch-project-hook find-file-hook))
-
-
-    •	Verbose Mode: Enable detailed output for debugging.
-
+(require 'auto-virtualenv)
 (setq auto-virtualenv-verbose t)
+(auto-virtualenv-setup)
+#+END_SRC
 
+* Configuration
+- ~auto-virtualenv-global-dirs~: Directories to search for virtual environments by project name.
+- ~auto-virtualenv-python-project-files~: Files that identify a Python project (e.g., ~requirements.txt~, ~setup.py~).
+- ~auto-virtualenv-activation-hooks~: List of hooks that trigger virtual environment activation. Default is ~find-file-hook~ and ~projectile-after-switch-project-hook~.
+- ~auto-virtualenv-verbose~: Enable verbose output for debugging.
 
+Example configuration:
 
-Example: Customizing Activation for Specific Projects
+#+BEGIN_SRC emacs-lisp
+(setq auto-virtualenv-global-dirs
+      '("~/.virtualenvs/" "~/.pyenv/versions/" "~/.envs/" "~/.conda/" "~/.conda/envs/"))
+(setq auto-virtualenv-python-project-files
+      '("requirements.txt" "Pipfile" "pyproject.toml" "setup.py" "manage.py" "tox.ini" ".flake8"))
+#+END_SRC
 
-To restrict activation to certain projects, use auto-virtualenv-skip-projects:
+* Similar Projects and Inspiration
+- [[https://github.com/jorgenschaefer/pyvenv][pyvenv]]: Provides manual activation and deactivation of virtual environments.
+- [[https://github.com/purcell/exec-path-from-shell][exec-path-from-shell]]: Synchronizes Emacs environment variables with the shell.
+- [[https://github.com/bbatsov/projectile][projectile]]: Project management and navigation tool for Emacs.
 
-(setq auto-virtualenv-skip-projects '("~/.emacs.d" "~/Documents/NonPythonProject"))
-
-Tips for Smooth Use
-
-    •	Avoid Frequent Modeline Updates: auto-virtualenv minimizes modeline changes to maintain performance.
-    •	Global Directory Setup: Ensure that your global virtualenv paths are correctly configured to avoid redundant environment searches.
-
-Similar Projects and Inspirations
-
-auto-virtualenv was inspired by other great tools in the Emacs and Python ecosystem:
-
-    •	pyvenv: Provides manual activation for Python virtual environments, allowing users to switch between virtual environments manually or use workon environments defined by virtualenvwrapper. auto-virtualenv differs by focusing on fully automated environment detection and activation.
-    •	direnv: Although not Emacs-specific, direnv automatically loads and unloads environment variables based on .envrc files in directories, providing a similar automated approach to environmental context switching.
-    •	projectile: auto-virtualenv leverages projectile for project detection, making it more efficient at handling multi-project workflows by activating environments only when relevant files are detected.
-    •	autoenv: An automatic environment loader for shell environments, it shares a similar philosophy with auto-virtualenv for Emacs, automatically adapting environments based on directory context.
-
-These tools informed the design of auto-virtualenv, particularly in automated activation, minimal user configuration, and compatibility with multi-environment setups.
-
-Contributing
-
-Contributions, bug reports, and feature requests are welcome! Please feel free to open an issue or submit a pull request on GitHub.
-
-License
-
-auto-virtualenv is available under the MIT License. See the LICENSE file for more details.
+* License
+This project is licensed under the GPLv3.
