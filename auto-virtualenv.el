@@ -3,7 +3,7 @@
 ;; Author: Marcwebbie <marcwebbie@gmail.com>
 ;; Maintainer: Marcwebbie <marcwebbie@gmail.com>
 ;; URL: https://github.com/marcwebbie/auto-virtualenv
-;; Version: 2.1.0
+;; Version: 2.1.1
 ;; Keywords: python, virtualenv, environment, tools, projects
 ;; Package-Requires: ((cl-lib "0.5"))
 ;; License: GPL-3.0-or-later
@@ -84,7 +84,7 @@
   :group 'auto-virtualenv)
 
 (defcustom auto-virtualenv-activation-hooks
-  '(find-file-hook)
+  '(find-file-hook projectile-after-switch-project-hook)
   "Hooks that trigger virtual environment activation."
   :type '(repeat symbol)
   :group 'auto-virtualenv)
@@ -116,7 +116,7 @@
                         'face '(:weight bold :foreground "DeepSkyBlue"))
           (propertize "[Venv: N/A]" 'face '(:weight bold :foreground "DimGray"))))
   (setq global-mode-string (list auto-virtualenv-mode-line))
-  (force-mode-line-update))
+  (force-mode-line-update t))
 
 (defun auto-virtualenv-find-local-venv (project-root)
   "Check for a local virtual environment in PROJECT-ROOT. Return the path if found, otherwise nil."
@@ -180,10 +180,10 @@
   (if (and (featurep 'projectile) (fboundp 'projectile-project-root))
       (projectile-project-root)
     (let ((dir (locate-dominating-file default-directory
-                                        (lambda (parent)
-                                          (cl-some (lambda (marker)
-                                                     (file-exists-p (expand-file-name marker parent)))
-                                                   '(".git" "setup.py" "Pipfile" "pyproject.toml"))))))
+                                       (lambda (parent)
+                                         (cl-some (lambda (marker)
+                                                    (file-exists-p (expand-file-name marker parent)))
+                                                  '(".git" "setup.py" "Pipfile" "pyproject.toml"))))))
       (if dir
           (expand-file-name dir)
         (auto-virtualenv--debug "No project root found.")
@@ -194,7 +194,10 @@
   (let* ((project-root (auto-virtualenv-locate-project-root)))
     (if (or (not project-root)
             (equal project-root auto-virtualenv-last-project))
-        (auto-virtualenv--debug "Skipping activation as project root has not changed or is empty.")
+        (progn
+          (auto-virtualenv--debug "Skipping activation as project root has not changed or is empty.")
+          ;; Always update the mode line, even if activation is skipped
+          (auto-virtualenv-update-mode-line))
       (setq auto-virtualenv-last-project project-root)
       (if (auto-virtualenv-is-python-project project-root)
           (let* ((project-name (file-name-nondirectory (directory-file-name project-root)))
