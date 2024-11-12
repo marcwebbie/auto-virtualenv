@@ -8,6 +8,7 @@ auto-virtualenv.el is an Emacs package that automatically activates Python virtu
 
 * Features
 - **Automatic Environment Activation**: Activates the appropriate virtual environment upon entering a project.
+- **Pyright and LSP Integration**: Optionally reloads `pyright` or `lsp-mode` after environment activation to resolve broken imports and ensure correct environment settings.
 - **Clear Mode Line Indicators**: Displays the active environment in the mode line or shows "Venv: N/A" when none is active.
 - **Customizable Directories**: Searches both local and global directories for virtual environments.
 - **Minimal Mode Line Updates**: Avoids frequent resets for smoother Emacs performance.
@@ -52,12 +53,21 @@ If you use ~straight.el~, configure it as follows:
 (auto-virtualenv-setup)
 #+END_SRC
 
+* LSP and Pyright Integration
+The package provides optional integration with `lsp-mode` and `pyright`, automatically reloading the language server when changing virtual environments. This ensures that the Python environment settings are correctly updated, avoiding issues with unresolved imports.
+
+To enable this feature, set ~auto-virtualenv-reload-lsp~ to ~t~ (the default setting):
+#+BEGIN_SRC emacs-lisp
+(setq auto-virtualenv-reload-lsp t)
+#+END_SRC
+
 * Customization Options
 The package provides customizable options to adapt to your project structure:
 - ~auto-virtualenv-global-dirs~: Directories to search for virtual environments by project name.
 - ~auto-virtualenv-python-project-files~: Files that identify a Python project (e.g., ~requirements.txt~, ~setup.py~).
 - ~auto-virtualenv-activation-hooks~: Hooks that trigger virtual environment activation (default: ~find-file-hook~ and ~projectile-after-switch-project-hook~).
 - ~auto-virtualenv-verbose~: Enable verbose output for debugging.
+- ~auto-virtualenv-reload-lsp~: Automatically reloads `lsp-mode` or `pyright` upon virtual environment change to ensure consistent environment settings.
 
 Example configuration:
 #+BEGIN_SRC emacs-lisp
