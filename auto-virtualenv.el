@@ -41,8 +41,8 @@
 ;;
 ;; See the README for detailed setup and configuration examples.
 ;;
-
 ;;; Code:
+
 (require 'cl-lib)
 (require 'json)
 (require 'projectile)
