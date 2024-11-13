@@ -45,7 +45,7 @@
 
 (require 'cl-lib)
 (require 'json)
-(require 'projectile)
+(require 'projectile nil t)
 
 (defgroup auto-virtualenv nil
   "Automatically activate Python virtual environments."
