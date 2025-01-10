@@ -64,6 +64,7 @@ To enable this feature, set ~auto-virtualenv-reload-lsp~ to ~t~ (the default set
 * Customization Options
 The package provides customizable options to adapt to your project structure:
 - ~auto-virtualenv-global-dirs~: Directories to search for virtual environments by project name.
+- ~auto-virtualenv-local-dirs~: Directories in the project root to search for virtual environments.
 - ~auto-virtualenv-python-project-files~: Files that identify a Python project (e.g., ~requirements.txt~, ~setup.py~).
 - ~auto-virtualenv-activation-hooks~: Hooks that trigger virtual environment activation (default: ~find-file-hook~ and ~projectile-after-switch-project-hook~).
 - ~auto-virtualenv-verbose~: Enable verbose output for debugging.
@@ -71,10 +72,12 @@ The package provides customizable options to adapt to your project structure:
 
 Example configuration:
 #+BEGIN_SRC emacs-lisp
-(setq auto-virtualenv-global-dirs
-      '("~/.virtualenvs/" "~/.pyenv/versions/" "~/.envs/" "~/.conda/" "~/.conda/envs/"))
-(setq auto-virtualenv-python-project-files
-      '("requirements.txt" "Pipfile" "pyproject.toml" "setup.py" "manage.py" "tox.ini" ".flake8"))
+  (setq auto-virtualenv-global-dirs
+        '("~/.virtualenvs/" "~/.pyenv/versions/" "~/.envs/" "~/.conda/" "~/.conda/envs/"))
+  (setq auto-virtualenv-global-dirs
+        '(".venv" "venv"))
+  (setq auto-virtualenv-python-project-files
+        '("requirements.txt" "Pipfile" "pyproject.toml" "setup.py" "manage.py" "tox.ini" ".flake8"))
 #+END_SRC
 
 * Related Projects and Inspirations
