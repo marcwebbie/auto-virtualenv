@@ -80,6 +80,11 @@
   :type 'boolean
   :group 'auto-virtualenv)
 
+(defcustom auto-virtualenv-local-env-dirs '(".venv" "venv" "env")
+  "A customizable list variable."
+  :type '(repeat string)
+  :group 'auto-virtualenv)
+
 (defvar auto-virtualenv-current-virtualenv nil
   "The currently activated virtual environment.")
 (defvar auto-virtualenv-last-project nil
@@ -116,11 +121,12 @@
 (defun auto-virtualenv-find-local-venv (project-root)
   "Check for a local virtual environment in PROJECT-ROOT. Return the path if found, otherwise nil."
   (auto-virtualenv--debug "Checking for local virtualenv in %s" project-root)
-  (let ((local-venv-path (or (expand-file-name ".venv" project-root)
-                             (expand-file-name "venv" project-root))))
-    (when (file-directory-p local-venv-path)
-      (auto-virtualenv--debug "Found local virtualenv at %s" local-venv-path)
-      local-venv-path)))
+  (catch 'found-virtualenv
+    (dolist (dir auto-virtualenv-local-env-dirs)
+      (let ((maybe-virtualenv-in (expand-file-name dir project-root)))
+        (when (file-directory-p maybe-virtualenv-in)
+          (auto-virtualenv--debug "Found local virtualenv at %s" maybe-virtualenv-in)
+          (throw 'found-virtualenv maybe-virtualenv-in))))))
 
 (defun auto-virtualenv-find-global-venv (env-name)
   "Search for ENV-NAME in `auto-virtualenv-global-dirs`, only at top level of each directory."
