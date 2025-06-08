@@ -57,6 +57,12 @@
   :type '(repeat string)
   :group 'auto-virtualenv)
 
+(defcustom auto-virtualenv-local-dirs
+  '(".venv" "venv")
+  "List of local directories to search for virtual environments."
+  :type '(repeat string)
+  :group 'auto-virtualenv)
+
 (defcustom auto-virtualenv-python-project-files
   '("requirements.txt" "Pipfile" "pyproject.toml" "setup.py" "manage.py" "tox.ini"
     ".flake8" "pytest.ini" ".pre-commit-config.yaml" "environment.yml"
@@ -117,11 +123,12 @@
 (defun auto-virtualenv-find-local-venv (project-root)
   "Check for a local virtual environment in PROJECT-ROOT. Return the path if found, otherwise nil."
   (auto-virtualenv--debug "Checking for local virtualenv in %s" project-root)
-  (let ((local-venv-path (or (expand-file-name ".venv" project-root)
-                             (expand-file-name "venv" project-root))))
-    (when (file-directory-p local-venv-path)
-      (auto-virtualenv--debug "Found local virtualenv at %s" local-venv-path)
-      local-venv-path)))
+  (cl-some (lambda (dir)
+             (let ((local-venv-path (expand-file-name dir project-root)))
+               (when (file-directory-p local-venv-path)
+                 (auto-virtualenv--debug "Found local virtualenv in %s" local-venv-path)
+                 local-venv-path)))
+           auto-virtualenv-local-dirs))
 
 (defun auto-virtualenv-find-global-venv (env-name)
   "Search for ENV-NAME in `auto-virtualenv-global-dirs`, only at top level of each directory."
