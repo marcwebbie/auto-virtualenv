@@ -3,7 +3,7 @@
 ;; Author: Marcwebbie <marcwebbie@gmail.com>
 ;; Maintainer: Marcwebbie <marcwebbie@gmail.com>
 ;; URL: https://github.com/marcwebbie/auto-virtualenv
-;; Version: 2.2.0
+;; Version: 2.2.1
 ;; Keywords: python, virtualenv, environment, tools, projects
 ;; Package-Requires: ((cl-lib "0.5"))
 ;; License: GPL-3.0-or-later
@@ -58,8 +58,9 @@
   :group 'auto-virtualenv)
 
 (defcustom auto-virtualenv-python-project-files
-  '("requirements.txt" "Pipfile" "pyproject.toml" "setup.py" "manage.py" "tox.ini" ".flake8" "pytest.ini"
-    ".pre-commit-config.yaml" "environment.yml" "__init__.py")
+  '("requirements.txt" "Pipfile" "pyproject.toml" "setup.py" "manage.py" "tox.ini"
+    ".flake8" "pytest.ini" ".pre-commit-config.yaml" "environment.yml"
+    "__init__.py" "*.py" ".python-version")
   "List of files that identify a Python project."
   :type '(repeat string)
   :group 'auto-virtualenv)
@@ -135,9 +136,10 @@
 (defun auto-virtualenv-is-python-project (project-root)
   "Check if PROJECT-ROOT contains Python project files."
   (auto-virtualenv--debug "Checking if %s has Python project files" project-root)
-  (cl-some (lambda (file)
-             (file-exists-p (expand-file-name file project-root)))
-           auto-virtualenv-python-project-files))
+  (or (cl-some (lambda (file)
+                 (file-expand-wildcards (expand-file-name file project-root)))
+               auto-virtualenv-python-project-files)
+      (directory-files-recursively project-root "\\.py$" 2)))
 
 (defun auto-virtualenv-activate (venv-path)
   "Activate the virtual environment at VENV-PATH."
