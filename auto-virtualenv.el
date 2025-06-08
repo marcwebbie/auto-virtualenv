@@ -3,7 +3,7 @@
 ;; Author: Marcwebbie <marcwebbie@gmail.com>
 ;; Maintainer: Marcwebbie <marcwebbie@gmail.com>
 ;; URL: https://github.com/marcwebbie/auto-virtualenv
-;; Version: 2.2.1
+;; Version: 2.3.0
 ;; Keywords: python, virtualenv, environment, tools, projects
 ;; Package-Requires: ((cl-lib "0.5"))
 ;; License: GPL-3.0-or-later
